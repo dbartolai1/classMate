@@ -347,6 +347,16 @@ class ClassMate(tk.Frame):
             if average >= letters[i]:
                 return x[i]
         return 'F'
+    
+    def max_letter_grade(self, code):
+        average=grades.course_potential(code)
+        if average==0: return 'X'
+        letters=grades.get_letters(code)
+        x=['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']
+        for i in range(len(letters)):
+            if average >= letters[i]:
+                return x[i]
+        return 'F'
 
     def class_page(self, code):
         self.clear_frame(self.page)
@@ -494,6 +504,13 @@ class ClassMate(tk.Frame):
             font=('Times New Roman', 20, 'bold'),
         )
         averageLabel.grid(row=len(classCategories)+3, column=3, sticky=tk.W)
+        edit_letters_button = tk.Button (
+            self.page,
+            text='Grade Cutoffs',
+            highlightbackground=self.grey,
+            command=lambda: self.edit_letter_page(code)
+        )
+        edit_letters_button.grid(column=4, row=len(classCategories)+3, sticky=tk.SW)
         remove_class_button = tk.Button (
             self.page,
             text=f'Remove {code}',
@@ -655,6 +672,23 @@ class ClassMate(tk.Frame):
             bg=self.grey 
         )
         progress_header.grid(row=0, column=2, sticky=tk.W, padx=10)
+        grade_header = tk.Label (
+            self.page,
+            text = 'Grade:',
+            font=('Times New Roman', 24, 'bold', 'underline'),
+            fg='black',
+            bg=self.grey 
+        )
+        grade_header.grid(row=0, column=3, sticky=tk.W, padx=10)
+        max_grade_header = tk.Label (
+            self.page,
+            text = 'Max Grade:',
+            font=('Times New Roman', 24, 'bold', 'underline'),
+            fg='black',
+            bg=self.grey 
+        )
+        max_grade_header.grid(row=0, column=4, sticky=tk.W, padx=10)
+
 
         if len(self.courses) == 0: self.new_class_page()
         else:
@@ -669,7 +703,7 @@ class ClassMate(tk.Frame):
                 progress_string=f'{progress}/{potential}'
                 course_name = tk.Label (
                     self.page,
-                    text = f'{name} ({hours}): ',
+                    text = f'{name}: ',
                     font=('Times New Roman', 24, 'bold'),
                     fg='black',
                     bg=self.grey 
@@ -691,6 +725,93 @@ class ClassMate(tk.Frame):
                     bg=self.grey
                 )
                 progress_label.grid(row=row, column=2, sticky=tk.W, padx = 10)
+                grade_label = tk.Label (
+                    self.page,
+                    text = self.letter_grade(code),
+                    font = ('Times New Roman', 24),
+                    fg='black',
+                    bg=self.grey
+                )
+                grade_label.grid(row=row, column=3, sticky=tk.W, padx = 10)
+                maxgrade_label = tk.Label (
+                    self.page,
+                    text = self.max_letter_grade(code),
+                    font = ('Times New Roman', 24),
+                    fg='black',
+                    bg=self.grey
+                )
+                maxgrade_label.grid(row=row, column=4, sticky=tk.W, padx = 10)
+
+    def update_letter_cutoff(self, code, letter, entry):
+        new=float(entry.get())
+        if grades.update_letter_cutoff(code, letter, new) == 0:
+            self.letter_update_error(code)
+        self.edit_letter_page(code)
+        
+    def letter_update_error(self, code):
+        self.clear_frame(self.page)
+        message = tk.Label (
+            self.page,
+            text = 'Invalid Value.',
+            font=('Times New Roman', 40, 'bold'),
+            fg='red',
+            bg=self.grey 
+        )
+        message.grid(row=0, column=0)
+        okay_button = tk.Button (
+            self.page,
+            text = 'Okay',
+            highlightbackground=self.grey,
+            command=lambda: self.edit_letter_page(code)
+        )
+        okay_button.grid(row=1, column=0)
+    
+    def edit_letter_page(self, code):
+        self.clear_frame(self.page)
+        letter_cutoffs = grades.get_letters(code)
+        letter_cutoffs.append(0)
+        x=['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']
+        header = tk.Label (
+            self.page,
+            text = "Letter Grades:",
+            font=('Times New Roman', 24, 'bold'),
+            fg='black',
+            bg=self.grey,
+        )
+        header.grid(row=0, column=0, sticky=tk.W, columnspan=2)
+        for i in range(len(letter_cutoffs)):
+            row=i+1
+            info = x[i]
+            label = tk.Label (
+                self.page,
+                text = f'{info} ≥ {letter_cutoffs[i]}',
+                bg=self.grey,
+                fg='black',
+                font=('Times New Roman', 20)
+            )
+            label.grid(row=row, column=0, sticky=tk.E)
+            if i==len(letter_cutoffs)-1: pass
+            else:
+                entry = tk.Entry (
+                    self.page, width=10
+                )
+                entry.grid(row=row, column=1)
+                button = tk.Button (
+                    self.page,
+                    text=f"Update {info} Cutoff",
+                    highlightbackground=self.grey,
+                    command=lambda info=info, entry=entry: self.update_letter_cutoff(code, info, entry)
+                )
+                button.grid(row=row, column=2)
+        return_button = tk.Button(
+            self.page,
+            text=f'Back to {code}',
+            highlightbackground=self.grey,
+            command = lambda: self.class_page(code)
+        )
+        return_button.grid(row=len(letter_cutoffs)+2, column=0)
+
+
 
 
 

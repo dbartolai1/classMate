@@ -221,6 +221,23 @@ def get_category_grades(code, category):
         grades.append(info[j])
     return grades
 
+def update_letter_cutoff(code, letter, new):
+    newInt = float(new)
+    current = get_letters(code)
+    letters = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-']
+    letters_db = ['Ap', 'An', 'Am', 'Bp', 'Bn', 'Bm', 'Cp', 'Cn', 'Cm', 'D+p', 'Dn', 'Dm']
+    index = -1
+    for i in range(len(current)):
+        if letter == letters[i]: index = i
+    if newInt >= current[index-1]:
+        return 0
+    if newInt <= current[index+1]:
+        return 0
+    with con:
+        update_statement = f'UPDATE scale SET {letters_db[index]} = {newInt} where code = :code'
+        cur.execute(update_statement, {'code': code})
+
+
 
 
 con.commit()
