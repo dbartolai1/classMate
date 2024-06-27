@@ -237,8 +237,47 @@ def update_letter_cutoff(code, letter, new):
         update_statement = f'UPDATE scale SET {letters_db[index]} = {newInt} where code = :code'
         cur.execute(update_statement, {'code': code})
 
+def letter_grade(code):
+    average=course_average(code)
+    if average==0: return 'X'
+    letters=get_letters(code)
+    x=['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']
+    for i in range(len(letters)):
+        if average >= letters[i]:
+            return x[i]
+    return 'F'
+
+def grade_points(code):
+    x=['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']
+    grade=letter_grade(code)
+    for i in range(len(x)):
+        if grade==x[i]: 
+            if i == 0:
+                return 4
+            if i == 12:
+                return 0
+            else:
+                return round((13-i)/3, 2)
+
+def gpa():
+    hours=0
+    gpa=0
+    for code in get_course_codes():
+        hours+=get_class_by_code(code)[2]
+        gpa+=get_class_by_code(code)[2]*grade_points(code)
+    return round(gpa/hours,2)
 
 
+
+def max_letter_grade(code):
+    average=course_potential(code)
+    if average==0: return 'X'
+    letters=get_letters(code)
+    x=['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']
+    for i in range(len(letters)):
+        if average >= letters[i]:
+            return x[i]
+    return 'F'
 
 con.commit()
 

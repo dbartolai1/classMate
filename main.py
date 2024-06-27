@@ -338,25 +338,7 @@ class ClassMate(tk.Frame):
         edit_grade_button.grid(row=9, column=0, sticky=tk.W)
         
 
-    def letter_grade(self, code):
-        average=grades.course_average(code)
-        if average==0: return 'X'
-        letters=grades.get_letters(code)
-        x=['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']
-        for i in range(len(letters)):
-            if average >= letters[i]:
-                return x[i]
-        return 'F'
     
-    def max_letter_grade(self, code):
-        average=grades.course_potential(code)
-        if average==0: return 'X'
-        letters=grades.get_letters(code)
-        x=['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']
-        for i in range(len(letters)):
-            if average >= letters[i]:
-                return x[i]
-        return 'F'
 
     def class_page(self, code):
         self.clear_frame(self.page)
@@ -376,7 +358,7 @@ class ClassMate(tk.Frame):
 
         letterLabel = tk.Label(
             self.page,
-            text=f'({self.letter_grade(code)})',
+            text=f'({grades.letter_grade(code)})',
             foreground='black',
             bg=self.grey,
             font=('Times New Roman', 30, 'bold'),
@@ -699,7 +681,6 @@ class ClassMate(tk.Frame):
                 potential=grades.course_potential(code)
                 progress=grades.course_progress(code)
                 name=grades.get_class_by_code(code)[0]
-                hours=grades.get_class_by_code(code)[2]
                 progress_string=f'{progress}/{potential}'
                 course_name = tk.Label (
                     self.page,
@@ -727,7 +708,7 @@ class ClassMate(tk.Frame):
                 progress_label.grid(row=row, column=2, sticky=tk.W, padx = 10)
                 grade_label = tk.Label (
                     self.page,
-                    text = self.letter_grade(code),
+                    text = grades.letter_grade(code),
                     font = ('Times New Roman', 24),
                     fg='black',
                     bg=self.grey
@@ -735,12 +716,20 @@ class ClassMate(tk.Frame):
                 grade_label.grid(row=row, column=3, sticky=tk.W, padx = 10)
                 maxgrade_label = tk.Label (
                     self.page,
-                    text = self.max_letter_grade(code),
+                    text = grades.max_letter_grade(code),
                     font = ('Times New Roman', 24),
                     fg='black',
                     bg=self.grey
                 )
                 maxgrade_label.grid(row=row, column=4, sticky=tk.W, padx = 10)
+        gpa_label = tk.Label (
+            self.page,
+            text=f'GPA: {grades.gpa()}',
+            fg='black',
+            bg=self.grey,
+            font=('Times New Roman', 24, 'bold'),
+        )
+        gpa_label.grid(row=len(self.courses)+3, column=0)
 
     def update_letter_cutoff(self, code, letter, entry):
         new=float(entry.get())
