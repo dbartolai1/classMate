@@ -247,6 +247,12 @@ class ClassMate(tk.Frame):
         )
         okay_button.grid(row=1, column=0)
 
+    def remove_grade(self, code, category, score):
+        if grades.remove_grade(code, category, score) == 0:
+            self.invalid_update(code, category)
+        self.category_page(code, category)
+
+
 
     def category_page(self, code, category):
         self.clear_frame(self.page)
@@ -255,6 +261,8 @@ class ClassMate(tk.Frame):
         updated_grade_var = tk.StringVar()
         info=grades.get_category_info(code, category)
         scores=grades.get_category_grades(code, category)
+        progress_text = str(grades.grade_progress(code, category))
+        potential_text = str(grades.grade_potential(code, category))
         scoresString=''
         if len(scores) > 0:
             for i in range(len(scores)-1):
@@ -280,6 +288,30 @@ class ClassMate(tk.Frame):
         )
         nameLabel.grid(row=0, column=0, columnspan=2, sticky=tk.W)
         gradesLabel.grid(row=1, column=0, columnspan=3, rowspan=2, sticky=tk.W)
+        assignmantsLabel = tk.Label (
+            self.page,
+            text = f'Assignments Remaining: {info[3]-info[4]}',
+            font = ('Times New Roman', 20),
+            fg='black',
+            bg=self.grey,
+        )
+        assignmantsLabel.grid(row=5, column=0, sticky=tk.W, columnspan=3)
+        averageLabel = tk.Label (
+            self.page,
+            text = f'Average: {grades.grade_average(code, category)} ({grades.category_letter_grade(code, category)})',
+            font = ('Times New Roman', 20),
+            fg='black',
+            bg=self.grey,
+        )
+        averageLabel.grid(row=3, column=0, sticky=tk.W, columnspan=3)
+        progressLabel = tk.Label(
+            self.page,
+            text = f'Progress: {progress_text}/{potential_text}',
+            bg=self.grey,
+            fg='black',
+            font=('Times New Roman', 20),
+        )
+        progressLabel.grid(row=4, column=0, sticky=tk.W, columnspan=3)
         new_grade_label = tk.Label(
             self.page,
             text='New Grade: ',
@@ -287,26 +319,26 @@ class ClassMate(tk.Frame):
             bg=self.grey,
             font=('Times New Roman', 20)
         )
-        new_grade_label.grid(row=3, column=0, sticky=tk.W)
+        new_grade_label.grid(row=8, column=0, sticky=tk.W)
         new_grade_entry = tk.Entry (
             self.page,
             textvariable=new_grade_var,
             width=10
         )
-        new_grade_entry.grid(row=3, column=1, sticky=tk.W)
+        new_grade_entry.grid(row=8, column=1, sticky=tk.W)
         new_grade_button = tk.Button (
             self.page,
             text = 'Save Grade',
             highlightbackground=self.grey,
             command=lambda: self.add_grade(code, category, new_grade_entry.get())
         )
-        new_grade_button.grid(row=5, column=0, sticky=tk.W)
+        new_grade_button.grid(row=9, column=0, sticky=tk.W)
         edit_grade_entry = tk.Entry (
             self.page,
             textvariable=replaced_grade_var,
             width=10,
         )
-        edit_grade_entry.grid(row=7, column=1, sticky=tk.W)
+        edit_grade_entry.grid(row=10, column=1, sticky=tk.W)
         old_grade_label = tk.Label(
             self.page,
             text='Old Grade: ',
@@ -314,13 +346,13 @@ class ClassMate(tk.Frame):
             bg=self.grey,
             font=('Times New Roman', 20)
         )
-        old_grade_label.grid(row=7, column=0, sticky=tk.W)
+        old_grade_label.grid(row=10, column=0, sticky=tk.W)
         updated_grade_entry = tk.Entry (
             self.page,
             textvariable=updated_grade_var,
             width=10
         )
-        updated_grade_entry.grid(row=8, column=1, sticky=tk.W)
+        updated_grade_entry.grid(row=11, column=1, sticky=tk.W)
         new_grade_label = tk.Label(
             self.page,
             text='Updated Grade: ',
@@ -328,16 +360,36 @@ class ClassMate(tk.Frame):
             bg=self.grey,
             font=('Times New Roman', 20)
         )
-        new_grade_label.grid(row=8, column=0, sticky=tk.W)
+        new_grade_label.grid(row=11, column=0, sticky=tk.W)
         edit_grade_button = tk.Button (
             self.page,
             text = 'Edit Grade',
             highlightbackground=self.grey,
             command=lambda: self.update_grade(code, category, edit_grade_entry.get(), updated_grade_entry.get())
         )
-        edit_grade_button.grid(row=9, column=0, sticky=tk.W)
-        
+        edit_grade_button.grid(row=12, column=0, sticky=tk.W)
+        remove_grade_label = tk.Label (
+            self.page,
+            text='Remove Grade: ',
+            fg='black',
+            bg=self.grey,
+            font=('Times New Roman', 20)
+        )
+        remove_grade_label.grid(row=13, column=0, sticky=tk.W)
+        remove_grade_entry = tk.Entry (
+            self.page,
+            width=10
+        )
+        remove_grade_entry.grid(row=13, column=1, sticky=tk.W)
+        remove_grade_button = tk.Button (
+            self.page,
+            text = 'Remove Grade',
+            highlightbackground=self.grey,
+            command=lambda: self.remove_grade(code, category, remove_grade_entry.get())
+        )
+        remove_grade_button.grid(row=14, column=0, sticky=tk.W)
 
+    
     
 
     def class_page(self, code):

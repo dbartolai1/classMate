@@ -132,6 +132,8 @@ def update_grade(code, category, oldScore, newScore):
         update_statement = f'UPDATE grades SET grade{index}={newScore} where code = :code and name = :name'
         cur.execute(update_statement, {'code': code, 'name': category})
 
+
+
 def grade_average(code, categoryName):
     average=0
     info=get_category_info(code, categoryName)
@@ -247,9 +249,20 @@ def letter_grade(code):
             return x[i]
     return 'F'
 
+def category_letter_grade(code, category):
+    average=grade_average(code, category)
+    if average==0: return 'X'
+    letters=get_letters(code)
+    x=['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']
+    for i in range(len(letters)):
+        if average >= letters[i]:
+            return x[i]
+    return 'F'
+
 def grade_points(code):
     x=['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']
     grade=letter_grade(code)
+    if grade=='X': return -1
     for i in range(len(x)):
         if grade==x[i]: 
             if i == 0:
@@ -263,10 +276,11 @@ def gpa():
     hours=0
     gpa=0
     for code in get_course_codes():
-        hours+=get_class_by_code(code)[2]
-        gpa+=get_class_by_code(code)[2]*grade_points(code)
+        if grade_points(code) < 0: pass
+        else:
+            hours+=get_class_by_code(code)[2]
+            gpa+=get_class_by_code(code)[2]*grade_points(code)
     return round(gpa/hours,2)
-
 
 
 def max_letter_grade(code):
@@ -278,6 +292,30 @@ def max_letter_grade(code):
         if average >= letters[i]:
             return x[i]
     return 'F'
+
+def remove_grade(code, category, score):
+    scoreInt = float(score)
+    grades=get_category_grades(code, category)
+    info=get_category_info(code, category)
+    entered=info[4]
+    last_grade=grades[entered-1]
+    index=-1
+    for i in range(len(grades)):
+        if grades[i] == scoreInt:
+            index=i
+    if index==-1: return 0
+    with con:
+        remove_statement = f'UPDATE grades SET grade{index} = {last_grade} where code = :code and name = :category'
+        zero_statement = f'UPDATE grades SET grade{entered-1} = 0 where code = :code and name = :category'
+        entered_statement = f'UPDATE grades SET entered = {entered-1} where code = :code and name = :category'
+        cur.execute(remove_statement, {'code': code, 'category': category})
+        cur.execute(zero_statement, {'code': code, 'category': category})
+        cur.execute(entered_statement, {'code': code, 'category': category})
+    return 1
+
+    
+
+
 
 con.commit()
 
