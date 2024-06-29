@@ -252,7 +252,10 @@ class ClassMate(tk.Frame):
             self.invalid_update(code, category)
         self.category_page(code, category)
 
-
+    def category_average(self, code, category):
+        average = grades.grade_average(code, category)
+        if average < 0: return "-"
+        return average
 
     def category_page(self, code, category):
         self.clear_frame(self.page)
@@ -298,7 +301,7 @@ class ClassMate(tk.Frame):
         assignmantsLabel.grid(row=5, column=0, sticky=tk.W, columnspan=3)
         averageLabel = tk.Label (
             self.page,
-            text = f'Average: {grades.grade_average(code, category)} ({grades.category_letter_grade(code, category)})',
+            text = f'Average: {self.category_average(code, category)} ({grades.category_letter_grade(code, category)})',
             font = ('Times New Roman', 20),
             fg='black',
             bg=self.grey,
