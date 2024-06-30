@@ -8,7 +8,7 @@ class ClassMate(tk.Frame):
         self.green = '#1D9919'
         self.black = '#000000'
         self.red = '#E41E1E'
-        self.grey = '#ABABAB' 
+        self.grey = '#FF99FF' 
         self.darkgrey = '#808080'
 
         
